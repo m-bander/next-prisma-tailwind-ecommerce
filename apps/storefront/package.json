@@ -16,6 +16,7 @@
       "db:format": "npx prisma format",
       "db:reset": "npx prisma db push --force-reset",
       "db:push": "npx prisma db push",
+      "db:seed:clothes": "bun prisma/seed-clothes.ts",
       "db:seed": "npx prisma db seed",
       "db:studio": "npx prisma studio"
    },
