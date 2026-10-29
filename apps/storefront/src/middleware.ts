@@ -3,7 +3,15 @@ import { getErrorResponse } from '@/lib/utils'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function middleware(req: NextRequest) {
-   if (req.nextUrl.pathname.startsWith('/api/auth')) return NextResponse.next()
+   if (
+      req.nextUrl.pathname.startsWith('/api/auth') ||
+      req.nextUrl.pathname.startsWith('/api/products') ||
+      req.nextUrl.pathname.startsWith('/api/subscription') ||
+      req.nextUrl.pathname.startsWith('/api/banners') ||
+      req.nextUrl.pathname.startsWith('/api/blogs')
+   ) {
+      return NextResponse.next()
+   }
 
    function isTargetingAPI() {
       return req.nextUrl.pathname.startsWith('/api')

@@ -3,13 +3,30 @@
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { docsConfig } from '@/config/docs'
 import Config from '@/config/site'
 import { cn } from '@/lib/utils'
-import { ViewIcon } from 'lucide-react'
+import { MenuIcon, ShoppingBag, ShoppingBasket, Heart, User, ListOrdered, Tag } from 'lucide-react'
 import Link, { LinkProps } from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+
+const mobileLinks = [
+   { title: 'الرئيسية (Home)', href: '/' },
+   { title: 'جميع المنتجات (All Products)', href: '/products' },
+   { title: 'عربة التسوق (Cart)', href: '/cart' },
+   { title: 'قائمة الرغبات (Wishlist)', href: '/wishlist' },
+   { title: 'حسابي (Profile)', href: '/profile' },
+   { title: 'طلباتي (My Orders)', href: '/profile/orders' },
+]
+
+const categories = [
+   { title: 'الملابس الرجالية', href: '/products?category=الملابس الرجالية' },
+   { title: 'الملابس النسائية', href: '/products?category=الملابس النسائية' },
+   { title: 'الأحذية الرياضية', href: '/products?category=الأحذية' },
+   { title: 'الساعات والإكسسوارات', href: '/products?category=الساعات والإكسسوارات' },
+   { title: 'الإلكترونيات الذكية', href: '/products?category=الإلكترونيات الذكية' },
+   { title: 'الحقائب والمحافظ', href: '/products?category=الحقائب والمحافظ' },
+]
 
 export function MobileNav() {
    const [open, setOpen] = useState(false)
@@ -21,7 +38,7 @@ export function MobileNav() {
                variant="ghost"
                className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
             >
-               <ViewIcon className="h-5" />
+               <MenuIcon className="h-6 w-6" />
                <span className="sr-only">Toggle Menu</span>
             </Button>
          </SheetTrigger>
@@ -31,42 +48,33 @@ export function MobileNav() {
                className="flex items-center"
                onOpenChange={setOpen}
             >
-               <div className="relative z-20 flex items-center text-lg font-medium">
-                  <svg
-                     xmlns="http://www.w3.org/2000/svg"
-                     viewBox="0 0 24 24"
-                     fill="none"
-                     stroke="currentColor"
-                     strokeWidth="2"
-                     strokeLinecap="round"
-                     strokeLinejoin="round"
-                     className="mr-2 h-6 w-6"
-                  >
-                     <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
-                  </svg>
+               <span className="text-xl font-bold text-primary">
                   {Config.name}
-               </div>
+               </span>
             </MobileLink>
             <ScrollArea className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
                <div className="flex flex-col space-y-3">
-                  {docsConfig.mainNav?.map(
-                     (item) =>
-                        item.href && (
-                           <MobileLink
-                              key={item.href}
-                              href={item.href}
-                              onOpenChange={setOpen}
-                           >
-                              {item.title}
-                           </MobileLink>
-                        )
-                  )}
+                  {mobileLinks.map((item) => (
+                     <MobileLink
+                        key={item.href}
+                        href={item.href}
+                        onOpenChange={setOpen}
+                     >
+                        {item.title}
+                     </MobileLink>
+                  ))}
                </div>
-               <div className="flex flex-col space-y-2">
-                  {docsConfig.sidebarNav.map((item, index) => (
-                     <div key={index} className="flex flex-col space-y-3 pt-6">
-                        <h4 className="font-medium">{item.title}</h4>
-                     </div>
+               <div className="flex flex-col space-y-2 pt-6">
+                  <h4 className="font-semibold text-sm text-foreground/80">التصنيفات</h4>
+                  {categories.map((cat) => (
+                     <MobileLink
+                        key={cat.href}
+                        href={cat.href}
+                        onOpenChange={setOpen}
+                        className="text-muted-foreground hover:text-foreground text-sm"
+                     >
+                        {cat.title}
+                     </MobileLink>
                   ))}
                </div>
             </ScrollArea>

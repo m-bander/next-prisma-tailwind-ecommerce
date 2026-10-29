@@ -6,6 +6,7 @@ import { UserNav } from '@/components/native//nav/user'
 import { MainNav } from '@/components/native/nav/desktop'
 import { Button } from '@/components/ui/button'
 import { useAuthenticated } from '@/hooks/useAuthentication'
+import { useCartContext } from '@/state/Cart'
 import { LogInIcon, MoonIcon, ShoppingBasketIcon, SunIcon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
@@ -32,10 +33,18 @@ export default function Header() {
 }
 
 export function CartNav() {
+   const { cart } = useCartContext()
+   const count = cart?.items?.reduce((acc: number, item: any) => acc + (item.count || 0), 0) || 0
+
    return (
       <Link href="/cart">
-         <Button size="icon" variant="outline" className="h-9">
-            <ShoppingBasketIcon className="h-4" />
+         <Button size="icon" variant="outline" className="h-9 relative">
+            <ShoppingBasketIcon className="h-4 w-4" />
+            {count > 0 && (
+               <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                  {count > 99 ? '99+' : count}
+               </span>
+            )}
          </Button>
       </Link>
    )

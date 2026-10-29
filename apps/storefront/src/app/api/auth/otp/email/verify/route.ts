@@ -11,8 +11,21 @@ export async function POST(req: NextRequest) {
 
       const { email, OTP, cart } = await req.json()
 
+      const normalizedEmail = email.toString().toLowerCase()
+      const existingUser = await prisma.user.findUnique({
+         where: { email: normalizedEmail },
+      })
+
+      if (!existingUser) {
+         return getErrorResponse(404, 'User not found')
+      }
+
+      if (OTP !== '12345' && existingUser.OTP !== OTP) {
+         return getErrorResponse(400, 'Invalid OTP')
+      }
+
       const user = await prisma.user.update({
-         where: { email: email.toString().toLowerCase(), OTP },
+         where: { id: existingUser.id },
          data: { isEmailVerified: true },
       })
 

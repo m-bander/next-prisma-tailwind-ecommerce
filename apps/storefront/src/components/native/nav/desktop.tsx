@@ -14,20 +14,31 @@ import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { forwardRef } from 'react'
 
-const components: { title: string; href: string; description: string }[] = [
-   {
-      title: 'Alert Dialog',
-      href: '/docs/primitives/alert-dialog',
-      description:
-         'A modal dialog that interrupts the user with important content and expects a response.',
-   },
+const categoriesList = [
+   { title: 'الملابس الرجالية', href: '/products?category=الملابس الرجالية', description: 'أحدث صيحات الملابس والقمصان والجينز' },
+   { title: 'الملابس النسائية', href: '/products?category=الملابس النسائية', description: 'فساتين وأزياء نسائية راقية وعصرية' },
+   { title: 'الأحذية الرياضية', href: '/products?category=الأحذية', description: 'أحذية جري وسنيكرز وأحذية رسمية' },
+   { title: 'الساعات والإكسسوارات', href: '/products?category=الساعات والإكسسوارات', description: 'ساعات يد فخمة ونظارات وأحزمة' },
+   { title: 'الإلكترونيات الذكية', href: '/products?category=الإلكترونيات الذكية', description: 'سماعات رأس وساعات ذكية وشواحن' },
+   { title: 'الحقائب والمحافظ', href: '/products?category=الحقائب والمحافظ', description: 'حقائب ظهر ولابتوب ومحافظ جلدية' },
+]
+
+const brandsList = [
+   { title: 'Nike', href: '/products?brand=Nike', description: 'أقوى الأحذية والملابس الرياضية' },
+   { title: 'Adidas', href: '/products?brand=Adidas', description: 'أحذية وسنيكرز وملابس تمرين' },
+   { title: 'Zara', href: '/products?brand=Zara', description: 'أحدث خطوط الموضة والأزياء العصرية' },
+   { title: 'Apple', href: '/products?brand=Apple', description: 'ساعات ذكية وسماعات وإكسسوارات' },
+   { title: 'Sony', href: '/products?brand=Sony', description: 'سماعات رأس بأعلى تقنيات الصوت' },
+   { title: "Levi's", href: "/products?brand=Levi's", description: 'الجينز الأصلي والجاكيتات الكلاسيكية' },
+   { title: 'Fossil', href: '/products?brand=Fossil', description: 'ساعات كرونوغراف وإكسسوارات فاخرة' },
+   { title: 'Urban Line', href: '/products?brand=Urban Line', description: 'أزياء شبابية وسترات للمدينة' },
 ]
 
 export function MainNav() {
    return (
       <div className="hidden md:flex gap-4">
          <Link href="/" className="flex items-center">
-            <span className="hidden font-medium sm:inline-block">
+            <span className="hidden font-bold sm:inline-block text-lg">
                {config.name}
             </span>
          </Link>
@@ -44,7 +55,7 @@ export function NavMenu() {
                <Link href="/products" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                      <div className="font-normal text-foreground/70">
-                        Products
+                        المنتجات (Products)
                      </div>
                   </NavigationMenuLink>
                </Link>
@@ -52,56 +63,38 @@ export function NavMenu() {
             <NavigationMenuItem>
                <NavigationMenuTrigger>
                   <div className="font-normal text-foreground/70">
-                     Categories
+                     التصنيفات (Categories)
                   </div>
                </NavigationMenuTrigger>
                <NavigationMenuContent>
-                  <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                     <li className="row-span-3">
-                        <NavigationMenuLink asChild>
-                           <Link
-                              className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-                              href="/"
-                           >
-                              <div className="mb-2 mt-4 text-lg font-medium">
-                                 shadcn/ui
-                              </div>
-                              <p className="text-sm leading-tight text-muted-foreground">
-                                 Beautifully designed components built with
-                                 Radix UI and Tailwind CSS.
-                              </p>
-                           </Link>
-                        </NavigationMenuLink>
-                     </li>
-                     <ListItem href="/docs" title="Introduction">
-                        Re-usable components built using Radix UI and Tailwind
-                        CSS.
-                     </ListItem>
-                     <ListItem href="/docs/installation" title="Installation">
-                        How to install dependencies and structure your app.
-                     </ListItem>
-                     <ListItem
-                        href="/docs/primitives/typography"
-                        title="Typography"
-                     >
-                        Styles for headings, paragraphs, lists...etc
-                     </ListItem>
+                  <ul className="grid w-[450px] gap-2 p-4 md:w-[550px] md:grid-cols-2">
+                     {categoriesList.map((cat) => (
+                        <ListItem
+                           key={cat.title}
+                           title={cat.title}
+                           href={cat.href}
+                        >
+                           {cat.description}
+                        </ListItem>
+                     ))}
                   </ul>
                </NavigationMenuContent>
             </NavigationMenuItem>
             <NavigationMenuItem>
                <NavigationMenuTrigger>
-                  <div className="font-normal text-foreground/70">Brands</div>
+                  <div className="font-normal text-foreground/70">
+                     العلامات التجارية (Brands)
+                  </div>
                </NavigationMenuTrigger>
                <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-2 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                     {components.map((component) => (
+                  <ul className="grid w-[450px] gap-2 p-4 md:w-[550px] md:grid-cols-2">
+                     {brandsList.map((brand) => (
                         <ListItem
-                           key={component.title}
-                           title={component.title}
-                           href={component.href}
+                           key={brand.title}
+                           title={brand.title}
+                           href={brand.href}
                         >
-                           {component.description}
+                           {brand.description}
                         </ListItem>
                      ))}
                   </ul>
@@ -120,7 +113,7 @@ const ListItem = forwardRef<
       <li>
          <NavigationMenuLink asChild>
             <Link
-               href={href}
+               href={href as string}
                ref={ref}
                className={cn(
                   'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
@@ -129,7 +122,7 @@ const ListItem = forwardRef<
                {...props}
             >
                <div className="text-sm font-medium leading-none">{title}</div>
-               <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+               <p className="line-clamp-2 text-xs leading-snug text-muted-foreground mt-1">
                   {children}
                </p>
             </Link>

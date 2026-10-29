@@ -1,26 +1,24 @@
 'use client'
 
-import { validateBoolean } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 
 export function useAuthenticated() {
-   const [authenticated, setAuthenticated] = useState(null)
+   const [authenticated, setAuthenticated] = useState<boolean>(false)
 
    useEffect(() => {
       try {
-         if (typeof window !== 'undefined' && window.localStorage) {
-            const cookies = document.cookie.split(';')
-            const loggedInCookie =
-               cookies
-                  .find((cookie) => cookie.startsWith('logged-in'))
-                  .split('=')[1] === 'true'
+         if (typeof window !== 'undefined') {
+            const hasCookie = document.cookie
+               .split(';')
+               .some((cookie) => cookie.trim().startsWith('logged-in=true'))
 
-            setAuthenticated(loggedInCookie ?? false)
+            setAuthenticated(hasCookie)
          }
       } catch (error) {
          console.error({ error })
+         setAuthenticated(false)
       }
    }, [])
 
-   return { authenticated: validateBoolean(authenticated, true) }
+   return { authenticated }
 }

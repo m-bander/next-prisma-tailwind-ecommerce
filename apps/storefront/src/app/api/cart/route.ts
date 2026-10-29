@@ -1,6 +1,8 @@
 import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: Request) {
    try {
       const userId = req.headers.get('X-USER-ID')
@@ -9,7 +11,7 @@ export async function GET(req: Request) {
          return new NextResponse('Unauthorized', { status: 401 })
       }
 
-      const cart = await prisma.cart.findUniqueOrThrow({
+      const cart = await prisma.cart.findUnique({
          where: { userId },
          include: {
             items: {
@@ -24,6 +26,10 @@ export async function GET(req: Request) {
             },
          },
       })
+
+      if (!cart) {
+         return NextResponse.json({ userId, items: [] })
+      }
 
       return NextResponse.json(cart)
    } catch (error) {
@@ -43,8 +49,8 @@ export async function POST(req: Request) {
       const { productId, count } = await req.json()
 
       if (count < 1) {
-         await prisma.cartItem.delete({
-            where: { UniqueCartItem: { cartId: userId, productId } },
+         await prisma.cartItem.deleteMany({
+            where: { cartId: userId, productId },
          })
       } else {
          await prisma.cart.upsert({
@@ -55,6 +61,12 @@ export async function POST(req: Request) {
                user: {
                   connect: {
                      id: userId,
+                  },
+               },
+               items: {
+                  create: {
+                     productId,
+                     count,
                   },
                },
             },
@@ -80,22 +92,46 @@ export async function POST(req: Request) {
          })
       }
 
-      const cart = await prisma.cart.findUniqueOrThrow({
+      const cart = await prisma.cart.findUnique({
          where: {
             userId,
          },
          include: {
             items: {
                include: {
-                  product: true,
+                  product: {
+                     include: {
+                        brand: true,
+                        categories: true,
+                     },
+                  },
                },
             },
          },
       })
 
-      return NextResponse.json(cart)
+      return NextResponse.json(cart ?? { userId, items: [] })
    } catch (error) {
-      console.error('[PRODUCT_DELETE]', error)
+      console.error('[CART_POST]', error)
+      return new NextResponse('Internal error', { status: 500 })
+   }
+}
+
+export async function DELETE(req: Request) {
+   try {
+      const userId = req.headers.get('X-USER-ID')
+
+      if (!userId) {
+         return new NextResponse('Unauthorized', { status: 401 })
+      }
+
+      await prisma.cartItem.deleteMany({
+         where: { cartId: userId },
+      })
+
+      return NextResponse.json({ userId, items: [] })
+   } catch (error) {
+      console.error('[CART_DELETE]', error)
       return new NextResponse('Internal error', { status: 500 })
    }
 }

@@ -12,33 +12,21 @@ import {
 } from './components/options'
 
 export default async function Products({ searchParams }) {
-   const { sort, isAvailable, brand, category, page = 1 } = searchParams ?? null
+   const { sort, isAvailable, brand, category, categories, page = 1 } = searchParams ?? {}
+   const catFilter = category || categories
 
    const orderBy = getOrderBy(sort)
 
    const brands = await prisma.brand.findMany()
-   const categories = await prisma.category.findMany()
+   const allCategories = await prisma.category.findMany()
    const products = await prisma.product.findMany({
       where: {
-         isAvailable: isAvailable == 'true' || sort ? true : undefined,
-         brand: {
-            title: {
-               contains: brand,
-               mode: 'insensitive',
-            },
-         },
-         categories: {
-            some: {
-               title: {
-                  contains: category,
-                  mode: 'insensitive',
-               },
-            },
-         },
+         ...(isAvailable === 'true' ? { isAvailable: true } : {}),
+         ...(brand ? { brand: { title: { contains: brand, mode: 'insensitive' } } } : {}),
+         ...(catFilter ? { categories: { some: { title: { contains: catFilter, mode: 'insensitive' } } } } : {}),
       },
       orderBy,
-      skip: (page - 1) * 12,
-      take: 12,
+      take: 40,
       include: {
          brand: true,
          categories: true,
@@ -54,8 +42,8 @@ export default async function Products({ searchParams }) {
          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
             <SortBy initialData={sort} />
             <CategoriesCombobox
-               initialCategory={category}
-               categories={categories}
+               initialCategory={catFilter}
+               categories={allCategories}
             />
             <BrandCombobox initialBrand={brand} brands={brands} />
             <AvailableToggle initialData={isAvailable} />

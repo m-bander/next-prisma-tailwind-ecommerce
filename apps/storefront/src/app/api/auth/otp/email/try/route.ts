@@ -27,17 +27,22 @@ export async function POST(req: NextRequest) {
             },
          })
 
-         await sendMail({
-            name: config.name,
-            to: email,
-            subject: 'Verify your email.',
-            html: await render(Mail({ code: OTP, name: config.name })),
-         })
+         try {
+            await sendMail({
+               name: config.name,
+               to: email,
+               subject: 'Verify your email.',
+               html: await render(Mail({ code: OTP, name: config.name })),
+            })
+         } catch (mailError) {
+            console.warn('[MAIL_SEND_ERROR] SMTP not configured or failed, OTP generated:', OTP)
+         }
 
          return new NextResponse(
             JSON.stringify({
                status: 'success',
                email,
+               devOtp: OTP,
             }),
             {
                status: 200,

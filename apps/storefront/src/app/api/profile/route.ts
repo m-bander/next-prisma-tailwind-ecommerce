@@ -1,6 +1,8 @@
 import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: Request) {
    try {
       const userId = req.headers.get('X-USER-ID')
@@ -10,7 +12,7 @@ export async function GET(req: Request) {
       }
 
       const user = await prisma.user.findUniqueOrThrow({
-         where: { id: userId, isEmailVerified: true },
+         where: { id: userId },
          include: {
             cart: {
                include: {

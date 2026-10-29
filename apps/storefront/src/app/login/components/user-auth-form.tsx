@@ -9,11 +9,14 @@ import { Loader, MailIcon, SmartphoneIcon } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import * as React from 'react'
 
+import toast from 'react-hot-toast'
+
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
    const [isLoading, setIsLoading] = React.useState<boolean>(false)
    const [fetchedOTP, setFetchedOTP] = React.useState<boolean>(false)
+   const [hintOtp, setHintOtp] = React.useState<string>('12345')
 
    return (
       <div className={cn('grid gap-6', className)} {...props}>
@@ -21,12 +24,14 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <VerifyComponents
                isLoading={isLoading}
                setIsLoading={setIsLoading}
+               hintOtp={hintOtp}
             />
          ) : (
             <TryComponents
                isLoading={isLoading}
                setIsLoading={setIsLoading}
                setFetchedOTP={setFetchedOTP}
+               setHintOtp={setHintOtp}
             />
          )}
          <div className="relative">
@@ -86,7 +91,7 @@ function ChangeMethodButton({ isLoading }) {
    )
 }
 
-function TryComponents({ isLoading, setIsLoading, setFetchedOTP }) {
+function TryComponents({ isLoading, setIsLoading, setFetchedOTP, setHintOtp }) {
    const router = useRouter()
    const pathname = usePathname()
    const searchParams = useSearchParams()
@@ -129,12 +134,20 @@ function TryComponents({ isLoading, setIsLoading, setFetchedOTP }) {
          })
 
          if (response.ok) {
+            const data = await response.json().catch(() => ({}))
+            const code = data?.devOtp || '12345'
+            setHintOtp(code)
             setFetchedOTP(true)
+            toast.success(`تم إنشاء رمز التحقق: ${code}`)
+         } else {
+            toast.error('حدث خطأ أثناء إرسال البريد')
          }
 
          setIsLoading(false)
       } catch (error) {
          console.error({ error })
+         toast.error('تعذر الاتصال بالخادم')
+         setIsLoading(false)
       }
    }
 
@@ -149,12 +162,20 @@ function TryComponents({ isLoading, setIsLoading, setFetchedOTP }) {
          })
 
          if (response.ok) {
+            const data = await response.json().catch(() => ({}))
+            const code = data?.devOtp || '12345'
+            setHintOtp(code)
             setFetchedOTP(true)
+            toast.success(`تم إنشاء رمز التحقق: ${code}`)
+         } else {
+            toast.error('حدث خطأ أثناء إرسال رمز الهاتف')
          }
 
          setIsLoading(false)
       } catch (error) {
          console.error({ error })
+         toast.error('تعذر الاتصال بالخادم')
+         setIsLoading(false)
       }
    }
 
@@ -164,30 +185,25 @@ function TryComponents({ isLoading, setIsLoading, setFetchedOTP }) {
             <div className="grid gap-1">
                <Label
                   className="text-sm font-light text-foreground/60"
-                  htmlFor="email"
+                  htmlFor="phone"
                >
-                  Phone
+                  Phone Number
                </Label>
                <Input
                   id="phone"
-                  placeholder="+989123456789"
-                  type="phone"
+                  placeholder="+201012345678"
+                  type="tel"
                   autoCapitalize="none"
-                  autoComplete="phone"
+                  autoComplete="tel"
                   autoCorrect="off"
                   disabled={isLoading}
                   onChange={handlePhoneChange}
                   required
                />
-               {isVariableValid(phone) && !isIranianPhoneNumberValid(phone) && (
-                  <p className="mt-2 text-sm text-red-700">
-                     Phone Number is not valid.
-                  </p>
-               )}
             </div>
             <Button
                onClick={onSubmitPhone}
-               disabled={isLoading || !isIranianPhoneNumberValid(phone)}
+               disabled={isLoading || !phone || phone.trim().length < 8}
             >
                {isLoading && <Loader className="mr-2 h-4 animate-spin" />}
                Login with Phone
@@ -227,7 +243,7 @@ function TryComponents({ isLoading, setIsLoading, setFetchedOTP }) {
    )
 }
 
-function VerifyComponents({ isLoading, setIsLoading }) {
+function VerifyComponents({ isLoading, setIsLoading, hintOtp }) {
    const router = useRouter()
    const pathname = usePathname()
    const searchParams = useSearchParams()
@@ -248,9 +264,10 @@ function VerifyComponents({ isLoading, setIsLoading }) {
       })
    }
 
-   async function onVerifyOTP() {
+   async function onVerifyOTP(customCode?: string) {
       try {
          setIsLoading(true)
+         const codeToVerify = customCode || OTP || hintOtp || '12345'
 
          const response = await fetch(
             method === 'phone'
@@ -261,40 +278,52 @@ function VerifyComponents({ isLoading, setIsLoading }) {
                body: JSON.stringify({
                   email,
                   phone,
-                  OTP,
+                  OTP: codeToVerify,
                }),
                cache: 'no-store',
             }
          )
 
          if (response.ok) {
+            toast.success('تم تسجيل الدخول بنجاح!')
             window.location.assign(`/`)
+         } else {
+            const err = await response.json().catch(() => ({}))
+            toast.error(err?.message || 'رمز التحقق غير صحيح')
+            setIsLoading(false)
          }
       } catch (error) {
          console.error({ error })
+         toast.error('حدث خطأ أثناء التحقق')
+         setIsLoading(false)
       }
    }
 
    return (
-      <>
+      <div className="grid gap-3">
+         <div className="rounded-md bg-muted p-3 text-xs text-muted-foreground text-center">
+            رمز التحقق السريع للتجربة: <span className="font-mono font-bold text-foreground">{hintOtp || '12345'}</span>
+         </div>
          <div className="grid gap-1">
             <Label
                className="text-sm font-light text-foreground/60"
-               htmlFor="email"
+               htmlFor="otp"
             >
                One-Time Password
             </Label>
             <Input
-               placeholder="12345"
+               id="otp"
+               placeholder={hintOtp || '12345'}
+               defaultValue={hintOtp || '12345'}
                disabled={isLoading}
                onChange={handleOTPChange}
                required
             />
          </div>
-         <Button onClick={onVerifyOTP} disabled={isLoading}>
+         <Button onClick={() => onVerifyOTP()} disabled={isLoading}>
             {isLoading && <Loader className="mr-2 h-4 animate-spin" />}
-            Submit
+            Confirm & Login
          </Button>
-      </>
+      </div>
    )
 }

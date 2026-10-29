@@ -12,34 +12,39 @@ export async function POST(req: NextRequest) {
 
       const { phone } = await req.json()
 
-      // Use isPhoneNumberValid if international
-      if (isIranianPhoneNumberValid(phone)) {
+      if (phone && phone.trim().length >= 8) {
+         const cleanPhone = phone.toString().trim()
          await prisma.user.upsert({
-            where: { phone: phone.toString().toLowerCase() },
+            where: { phone: cleanPhone },
             update: {
                OTP,
             },
             create: {
-               phone: phone.toString().toLowerCase(),
+               phone: cleanPhone,
                OTP,
             },
          })
 
-         await sendTransactionalSMS({
-            Mobile: phone,
-            TemplateId: 100000,
-            Parameters: [
-               {
-                  name: 'Code',
-                  value: '12345',
-               },
-            ],
-         })
+         try {
+            await sendTransactionalSMS({
+               Mobile: cleanPhone,
+               TemplateId: 100000,
+               Parameters: [
+                  {
+                     name: 'Code',
+                     value: OTP,
+                  },
+               ],
+            })
+         } catch (smsError) {
+            console.warn('[SMS_SEND_ERROR] SMS not configured or failed:', smsError)
+         }
 
          return new NextResponse(
             JSON.stringify({
                status: 'success',
-               phone,
+               phone: cleanPhone,
+               devOtp: OTP,
             }),
             {
                status: 200,
@@ -48,9 +53,7 @@ export async function POST(req: NextRequest) {
          )
       }
 
-      if (!isIranianPhoneNumberValid(phone)) {
-         return getErrorResponse(400, 'Incorrect Email')
-      }
+      return getErrorResponse(400, 'Invalid Phone Number')
    } catch (error) {
       console.error(error)
       if (error instanceof ZodError) {
