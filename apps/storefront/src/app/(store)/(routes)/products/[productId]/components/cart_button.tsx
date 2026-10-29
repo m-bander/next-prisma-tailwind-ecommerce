@@ -9,11 +9,7 @@ import { MinusIcon, PlusIcon, ShoppingBasketIcon, X } from 'lucide-react'
 import { useState } from 'react'
 
 export default function CartButton({ product }) {
-   return (
-      <CartContextProvider>
-         <ButtonComponent product={product} />
-      </CartContextProvider>
-   )
+   return <ButtonComponent product={product} />
 }
 
 export function ButtonComponent({ product }) {

@@ -35,7 +35,7 @@ export async function GET(req: Request) {
          birthday: user.birthday,
          addresses: user.addresses,
          wishlist: user.wishlist,
-         cart: user.cart,
+         cart: user.cart ?? { items: [] },
       })
    } catch (error) {
       console.error('[PROFILE_GET]', error)
