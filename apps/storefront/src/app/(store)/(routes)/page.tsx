@@ -12,6 +12,8 @@ import prisma from '@/lib/prisma'
 import { isVariableValid } from '@/lib/utils'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default async function Index() {
    const products = await prisma.product.findMany({
       take: 12,

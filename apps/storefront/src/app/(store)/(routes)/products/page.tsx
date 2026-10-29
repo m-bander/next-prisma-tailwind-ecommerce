@@ -11,6 +11,8 @@ import {
    SortBy,
 } from './components/options'
 
+export const dynamic = 'force-dynamic'
+
 export default async function Products({ searchParams }) {
    const { sort, isAvailable, brand, category, categories, page = 1 } = searchParams ?? {}
    const catFilter = category || categories
